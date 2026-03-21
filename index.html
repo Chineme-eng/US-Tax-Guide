@@ -229,7 +229,7 @@
       <p>Comparing <strong id="compareStateA"></strong> vs <strong id="compareStateB"></strong></p>
       <div style="display:flex;gap:0.5rem">
         <button class="compare-btn secondary" id="clearCompare">Clear</button>
-        <button class="compare-btn" id="viewCompareFull">View Full Comparison</button>
+        <button class="compare-btn" id="viewCompareFull">Edit Comparison</button>
       </div>
     </div>
 
@@ -243,7 +243,7 @@
       </div>
       <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
         <div class="quick-stats" id="quickStats"></div>
-        <button class="compare-btn secondary" id="addCompareBtn" style="font-size:0.68rem">+ Compare</button>
+        <button class="compare-btn secondary" id="addCompareBtn" style="font-size:0.68rem">⇄ Compare States</button>
       </div>
     </div>
 
@@ -281,6 +281,7 @@
           <span class="select-arrow">↓</span>
         </div>
       </div>
+      <div id="compareMsg" class="hidden" style="font-family:var(--mono);font-size:0.75rem;color:var(--accent);margin-bottom:1rem;padding:0.5rem 0.75rem;background:var(--accent-light);border-radius:var(--radius)"></div>
       <div id="compareTableWrap"></div>
     </div>
   </div>
@@ -432,14 +433,9 @@ document.querySelectorAll(".filing-toggle button").forEach(btn => {
   });
 });
 
+// ── Compare button: always opens modal immediately, pre-filled with current state ──
 document.getElementById("addCompareBtn").addEventListener("click", () => {
-  if (!currentState) return;
-  if (!compareState) {
-    compareState = currentState;
-    document.getElementById("compareBanner").classList.add("hidden");
-  } else if (compareState !== currentState) {
-    showCompareBanner(compareState, currentState);
-  }
+  openCompareModal(currentState, compareState);
 });
 
 document.getElementById("clearCompare").addEventListener("click", () => {
@@ -448,22 +444,33 @@ document.getElementById("clearCompare").addEventListener("click", () => {
 });
 
 document.getElementById("viewCompareFull").addEventListener("click", () => {
-  openCompareModal(compareState, currentState);
+  openCompareModal(
+    document.getElementById("compareSelectA").value || currentState,
+    document.getElementById("compareSelectB").value || compareState
+  );
 });
 
-document.getElementById("closeModal").addEventListener("click", () => {
-  document.getElementById("compareModal").classList.add("hidden");
-});
+document.getElementById("closeModal").addEventListener("click", closeCompareModal);
 
 document.getElementById("compareModal").addEventListener("click", e => {
-  if (e.target === document.getElementById("compareModal")) document.getElementById("compareModal").classList.add("hidden");
+  if (e.target === document.getElementById("compareModal")) closeCompareModal();
+});
+
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") closeCompareModal();
 });
 
 ['compareSelectA','compareSelectB'].forEach(id => {
   document.getElementById(id).addEventListener("change", () => {
     const a = document.getElementById("compareSelectA").value;
     const b = document.getElementById("compareSelectB").value;
-    if (a && b) renderCompareTable(a, b);
+    if (a && b && a !== b) {
+      renderCompareTable(a, b);
+      document.getElementById("compareMsg").classList.add("hidden");
+    } else if (a === b) {
+      document.getElementById("compareMsg").textContent = "Please select two different states.";
+      document.getElementById("compareMsg").classList.remove("hidden");
+    }
   });
 });
 
@@ -570,27 +577,45 @@ function renderQuirks(d) {
   document.getElementById("quirksContent").innerHTML = d.quirks.map(q=>`<div class="quirk-item"><span class="quirk-icon">${q.icon}</span><p class="quirk-text">${q.text}</p></div>`).join("");
 }
 
-// ── Compare ───────────────────────────────────────────────────
+// ── Compare functions ─────────────────────────────────────────
+function closeCompareModal() {
+  document.getElementById("compareModal").classList.add("hidden");
+}
+
 function showCompareBanner(a, b) {
+  if (!a || !b || !TAX_DATA[a] || !TAX_DATA[b]) return;
   document.getElementById("compareStateA").textContent = TAX_DATA[a].name;
   document.getElementById("compareStateB").textContent = TAX_DATA[b].name;
   document.getElementById("compareBanner").classList.remove("hidden");
 }
 
-function openCompareModal(a, b) {
+function openCompareModal(stateA, stateB) {
   const modal = document.getElementById("compareModal");
   modal.classList.remove("hidden");
-  document.getElementById("compareSelectA").value = a || stateOrder[0];
-  document.getElementById("compareSelectB").value = b || stateOrder[1];
-  renderCompareTable(
-    document.getElementById("compareSelectA").value,
-    document.getElementById("compareSelectB").value
-  );
+
+  const selA = document.getElementById("compareSelectA");
+  const selB = document.getElementById("compareSelectB");
+
+  // Pre-fill: current state in A, previously compared state (or different default) in B
+  selA.value = stateA || stateOrder[0];
+  const fallbackB = stateOrder.find(s => s !== selA.value);
+  selB.value = (stateB && stateB !== selA.value) ? stateB : fallbackB;
+
+  document.getElementById("compareMsg").classList.add("hidden");
+
+  if (selA.value && selB.value && selA.value !== selB.value) {
+    renderCompareTable(selA.value, selB.value);
+  }
 }
 
 function renderCompareTable(codeA, codeB) {
   const a = TAX_DATA[codeA], b = TAX_DATA[codeB];
+  if (!a || !b) return;
   const incomes = [40000, 75000, 120000, 200000];
+
+  // Save as last compare and update banner
+  compareState = codeB;
+  showCompareBanner(codeA, codeB);
 
   function topRate(d) {
     if (d.incomeTax.type === "none") return 0;
@@ -603,7 +628,7 @@ function renderCompareTable(codeA, codeB) {
   }
 
   function winner(va, vb, lowerIsBetter = true) {
-    if (va === vb) return ['',''];
+    if (Math.abs(va - vb) < 0.001) return ['',''];
     if (lowerIsBetter) return va < vb ? ['compare-winner','compare-loser'] : ['compare-loser','compare-winner'];
     return va > vb ? ['compare-winner','compare-loser'] : ['compare-loser','compare-winner'];
   }
@@ -613,40 +638,53 @@ function renderCompareTable(codeA, codeB) {
   const [wSA, wSB] = winner(a.salesTax.combined, b.salesTax.combined);
   const [wPA, wPB] = winner(a.propertyTax.effective, b.propertyTax.effective);
 
-  let incomeRows = incomes.map(inc => {
+  const incomeRows = incomes.map(inc => {
     const thA = takehome(a, inc), thB = takehome(b, inc);
+    const diff = Math.abs(thA - thB);
     const [wA, wB] = winner(thA, thB, false);
-    return `<tr><td>Take-home on ${fmt(inc)}</td><td class="${wA}">${fmt(thA)}</td><td class="${wB}">${fmt(thB)}</td></tr>`;
+    const diffStr = diff > 0 ? ` <span style="font-size:.7rem;color:var(--ink-faint)">(${fmt(diff)} diff)</span>` : '';
+    return `<tr>
+      <td>Take-home on ${fmt(inc)}</td>
+      <td class="${wA}">${fmt(thA)}</td>
+      <td class="${wB}">${fmt(thB)}${wB === 'compare-winner' ? diffStr : ''}</td>
+    </tr>`;
   }).join("");
 
-  const rateDisplay = d => d.incomeTax.type === "none" ? "None" : d.incomeTax.type === "flat" ? `${fmtPct(d.incomeTax.rate)} flat` : `Up to ${fmtPct(topRate(d))}`;
+  const rateDisplay = d => {
+    if (d.incomeTax.type === "none") return '<span style="color:var(--accent2);font-weight:600">None</span>';
+    if (d.incomeTax.type === "flat") return `${fmtPct(d.incomeTax.rate)} flat`;
+    return `Up to ${fmtPct(topRate(d))}`;
+  };
+
+  const noTaxNote = d => d.incomeTax.type === "none"
+    ? `<span style="font-size:.7rem;color:var(--ink-faint);display:block">0.0%</span>` : '';
 
   document.getElementById("compareTableWrap").innerHTML = `
     <table class="compare-table">
-      <thead><tr><th>Category</th><th>${a.emoji} ${a.name}</th><th>${b.emoji} ${b.name}</th></tr></thead>
+      <thead>
+        <tr>
+          <th>Category</th>
+          <th>${a.emoji} ${a.name}</th>
+          <th>${b.emoji} ${b.name}</th>
+        </tr>
+      </thead>
       <tbody>
-        <tr><td>Income Tax Structure</td><td>${rateDisplay(a)}</td><td>${rateDisplay(b)}</td></tr>
-        <tr><td>Top State Income Tax Rate</td><td class="${wTA}">${fmtPct(trA)}</td><td class="${wTB}">${fmtPct(trB)}</td></tr>
+        <tr><td>Income Tax Type</td><td>${rateDisplay(a)}</td><td>${rateDisplay(b)}</td></tr>
+        <tr>
+          <td>Top State Income Tax</td>
+          <td class="${wTA}">${fmtPct(trA)}${noTaxNote(a)}</td>
+          <td class="${wTB}">${fmtPct(trB)}${noTaxNote(b)}</td>
+        </tr>
         ${incomeRows}
         <tr><td>Combined Sales Tax</td><td class="${wSA}">${fmtPct(a.salesTax.combined)}</td><td class="${wSB}">${fmtPct(b.salesTax.combined)}</td></tr>
         <tr><td>Effective Property Tax</td><td class="${wPA}">${fmtPct(a.propertyTax.effective)}</td><td class="${wPB}">${fmtPct(b.propertyTax.effective)}</td></tr>
       </tbody>
     </table>
-    <p style="font-size:.7rem;color:var(--ink-faint);margin-top:1rem;font-style:italic;font-family:var(--mono)">Green = lower tax burden. Take-home uses 2025 federal brackets + ${filingStatus} standard deduction.</p>`;
+    <p style="font-size:.7rem;color:var(--ink-faint);margin-top:1rem;font-style:italic;font-family:var(--mono)">
+      🟢 Green = lower tax burden / higher take-home &nbsp;·&nbsp; 🔴 Red = higher burden &nbsp;·&nbsp; Filing status: ${filingStatus === 'mfj' ? 'Married Filing Jointly' : filingStatus === 'hoh' ? 'Head of Household' : 'Single'}
+    </p>`;
 }
 
-// Button to open comparison from scratch
-document.getElementById("addCompareBtn").addEventListener("click", () => {
-  if (!currentState) return;
-  if (!compareState) {
-    compareState = currentState;
-    // show a subtle hint
-    document.getElementById("addCompareBtn").textContent = "✓ Pinned — pick another state";
-  } else if (compareState !== currentState) {
-    showCompareBanner(compareState, currentState);
-    openCompareModal(compareState, currentState);
-  }
-});
 </script>
 </body>
 </html>
