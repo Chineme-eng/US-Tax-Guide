@@ -1,1 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>US State Tax Guide</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* =============================================
+       TaxMap — US State Tax Guide
+       Aesthetic: Editorial / Financial Newspaper
+       Fonts: Playfair Display + DM Mono + DM Sans
+       ============================================= */
 
+    :root {
+      --bg: #f5f0e8;
+      --bg-card: #fdfaf4;
+      --ink: #1a1208;
+      --ink-muted: #5a4f3a;
+      --ink-faint: #a89880;
+      --accent: #c8402a;
+      --accent-light: #f2ded9;
+      --accent2: #2a6e4a;
+      --accent2-light: #d6ede1;
+      --gold: #b8862a;
+      --gold-light: #f5e8c8;
+      --border: #d4c8b0;
+      --border-strong: #a89a7a;
+      --mono: 'DM Mono', monospace;
+      --sans: 'DM Sans', sans-serif;
+      --serif: 'Playfair Display', Georgia, serif;
+      --radius: 2px;
+      --shadow: 0 2px 12px rgba(26,18,8,0.08);
+      --shadow-lg: 0 8px 32px rgba(26,18,8,0.12);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--sans);
+      font-weight: 400;
+      line-height: 1.6;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    .noise {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+      background-size: 200px;
+    }
+
+    /* ── Header ── */
+    header { background: var(--ink); color: var(--bg); padding: 0; border-bottom: 4px solid var(--accent); }
+    .header-inner { max-width: 1100px; margin: 0 auto; padding: 1.25rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+    .logo { display: flex; align-items: center; gap: 1rem; }
+    .logo-icon { font-family: var(--mono); font-size: 2rem; font-weight: 500; color: var(--accent); background: rgba(200,64,42,0.15); width: 2.8rem; height: 2.8rem; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(200,64,42,0.3); border-radius: var(--radius); flex-shrink: 0; }
+    .logo h1 { font-family: var(--serif); font-size: 1.5rem; font-weight: 900; letter-spacing: -0.02em; line-height: 1; color: #fff; }
+    .logo p { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint); margin-top: 2px; }
+    .header-note { font-family: var(--mono); font-size: 0.7rem; color: var(--ink-faint); letter-spacing: 0.06em; text-align: right; }
+
+    /* ── Main ── */
+    main { max-width: 1100px; margin: 0 auto; padding: 2.5rem 2rem 4rem; }
+
+    /* ── Hero ── */
+    .hero { display: flex; align-items: flex-end; justify-content: space-between; gap: 2rem; margin-bottom: 2.5rem; padding-bottom: 2.5rem; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+    .hero-text h2 { font-family: var(--serif); font-size: clamp(2rem, 4vw, 3rem); font-weight: 900; line-height: 1.15; letter-spacing: -0.03em; color: var(--ink); margin-bottom: 0.6rem; }
+    .hero-text h2 em { font-style: italic; color: var(--accent); }
+    .hero-text p { font-size: 1rem; color: var(--ink-muted); max-width: 480px; line-height: 1.7; }
+
+    /* ── Selector ── */
+    .selector-wrap { display: flex; flex-direction: column; gap: 0.4rem; min-width: 260px; }
+    .selector-wrap label { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-muted); }
+    .select-outer { position: relative; }
+    .select-outer select { width: 100%; padding: 0.85rem 3rem 0.85rem 1.1rem; font-family: var(--sans); font-size: 1rem; font-weight: 500; color: var(--ink); background: var(--bg-card); border: 2px solid var(--border-strong); border-radius: var(--radius); appearance: none; cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s; }
+    .select-outer select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+    .select-outer select:hover { border-color: var(--ink-muted); }
+    .select-arrow { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); font-size: 1rem; color: var(--accent); pointer-events: none; font-family: var(--mono); }
+
+    /* ── State Header ── */
+    .state-header { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; margin-bottom: 1.75rem; flex-wrap: wrap; }
+    .state-title-block { display: flex; align-items: center; gap: 1rem; }
+    .state-emoji { font-size: 2.5rem; line-height: 1; }
+    .state-title-block h3 { font-family: var(--serif); font-size: 1.8rem; font-weight: 700; letter-spacing: -0.02em; color: var(--ink); line-height: 1.1; }
+    .state-title-block p { font-family: var(--mono); font-size: 0.75rem; color: var(--ink-muted); margin-top: 3px; letter-spacing: 0.05em; }
+    .quick-stats { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .quick-stat { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.6rem 1rem; text-align: center; min-width: 90px; }
+    .quick-stat-value { font-family: var(--mono); font-size: 1.2rem; font-weight: 500; color: var(--accent); line-height: 1; }
+    .quick-stat-label { font-size: 0.68rem; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 3px; }
+
+    /* ── Cards Grid ── */
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+    .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow); animation: fadeUp 0.4s ease both; position: relative; overflow: hidden; }
+    .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+    .card--income::before { background: var(--accent); }
+    .card--examples::before { background: var(--gold); }
+    .card--other::before { background: var(--accent2); }
+    .card--quirks::before { background: var(--ink-muted); }
+    .card:nth-child(2) { animation-delay: 0.07s; }
+    .card:nth-child(3) { animation-delay: 0.14s; }
+    .card:nth-child(4) { animation-delay: 0.21s; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    .card-label { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.65rem; }
+
+    /* ── Income Tax ── */
+    .tax-type-badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-family: var(--mono); font-size: 0.75rem; font-weight: 500; margin-bottom: 1rem; letter-spacing: 0.04em; }
+    .badge--none { background: var(--accent2-light); color: var(--accent2); }
+    .badge--flat { background: var(--gold-light); color: var(--gold); }
+    .badge--brackets { background: var(--accent-light); color: var(--accent); }
+    .brackets-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; margin-top: 0.5rem; }
+    .brackets-table th { font-family: var(--mono); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-faint); text-align: left; padding: 0.4rem 0.5rem; border-bottom: 1px solid var(--border); }
+    .brackets-table td { padding: 0.45rem 0.5rem; border-bottom: 1px solid var(--border); color: var(--ink-muted); font-family: var(--mono); font-size: 0.82rem; }
+    .brackets-table tr:last-child td { border-bottom: none; }
+    .brackets-table td:last-child { color: var(--accent); font-weight: 500; text-align: right; }
+    .flat-rate { font-family: var(--mono); font-size: 2.5rem; font-weight: 500; color: var(--gold); line-height: 1; margin-bottom: 0.25rem; }
+    .flat-desc { font-size: 0.85rem; color: var(--ink-muted); }
+    .no-tax-message { font-family: var(--serif); font-size: 1.1rem; color: var(--accent2); font-style: italic; line-height: 1.5; }
+
+    /* ── Take-Home Examples ── */
+    .example-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem 0; border-bottom: 1px dashed var(--border); }
+    .example-row:last-child { border-bottom: none; }
+    .example-income { font-family: var(--mono); font-size: 0.85rem; color: var(--ink-muted); width: 80px; flex-shrink: 0; }
+    .example-bar-wrap { flex: 1; position: relative; height: 8px; background: var(--border); border-radius: 999px; overflow: hidden; }
+    .example-bar { height: 100%; background: linear-gradient(90deg, var(--gold), var(--accent2)); border-radius: 999px; transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
+    .example-takehome { font-family: var(--mono); font-size: 0.9rem; font-weight: 500; color: var(--ink); width: 90px; text-align: right; flex-shrink: 0; }
+    .example-pct { font-family: var(--mono); font-size: 0.7rem; color: var(--accent); width: 40px; text-align: right; flex-shrink: 0; }
+    .example-note { font-size: 0.72rem; color: var(--ink-faint); margin-top: 0.75rem; font-style: italic; }
+
+    /* ── Sales & Property ── */
+    .tax-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 0.85rem 0; border-bottom: 1px solid var(--border); gap: 1rem; }
+    .tax-row:last-child { border-bottom: none; }
+    .tax-row-label { font-size: 0.875rem; color: var(--ink-muted); flex: 1; }
+    .tax-row-label strong { display: block; color: var(--ink); font-weight: 500; margin-bottom: 2px; }
+    .tax-row-value { font-family: var(--mono); font-size: 1.1rem; font-weight: 500; color: var(--accent2); white-space: nowrap; }
+
+    /* ── Quirks ── */
+    .quirk-item { display: flex; gap: 0.75rem; padding: 0.7rem 0; border-bottom: 1px solid var(--border); align-items: flex-start; }
+    .quirk-item:last-child { border-bottom: none; }
+    .quirk-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+    .quirk-text { font-size: 0.875rem; color: var(--ink-muted); line-height: 1.55; }
+
+    /* ── Placeholder ── */
+    .placeholder { display: flex; align-items: center; justify-content: center; min-height: 320px; }
+    .placeholder-inner { text-align: center; color: var(--ink-faint); }
+    .placeholder-inner span { font-size: 3rem; display: block; margin-bottom: 1rem; opacity: 0.5; }
+    .placeholder-inner p { font-family: var(--mono); font-size: 0.85rem; letter-spacing: 0.06em; }
+
+    /* ── Footer ── */
+    footer { background: var(--ink); color: var(--ink-faint); text-align: center; padding: 1.5rem 2rem; font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.06em; line-height: 1.7; }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 700px) {
+      .grid { grid-template-columns: 1fr; }
+      .hero { flex-direction: column; align-items: flex-start; }
+      .selector-wrap { width: 100%; }
+      .state-header { flex-direction: column; align-items: flex-start; }
+      .header-note { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="noise"></div>
+
+  <header>
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">$</span>
+        <div>
+          <h1>TaxMap</h1>
+          <p>U.S. State Tax Guide</p>
+        </div>
+      </div>
+      <div class="header-note">Data reflects 2024 tax year estimates</div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-text">
+        <h2>Know what you <em>actually</em> keep.</h2>
+        <p>Select your state to see income tax brackets, sales tax, property tax rates, and real take-home pay examples.</p>
+      </div>
+      <div class="selector-wrap">
+        <label for="stateSelect">Choose your state</label>
+        <div class="select-outer">
+          <select id="stateSelect">
+            <option value="">— Select a State —</option>
+          </select>
+          <span class="select-arrow">↓</span>
+        </div>
+      </div>
+    </section>
+
+    <div id="taxContent" class="tax-content hidden">
+      <div class="state-header">
+        <div class="state-title-block">
+          <span class="state-emoji" id="stateEmoji"></span>
+          <div>
+            <h3 id="stateName"></h3>
+            <p id="stateTagline"></p>
+          </div>
+        </div>
+        <div class="quick-stats" id="quickStats"></div>
+      </div>
+      <div class="grid">
+        <div class="card card--income">
+          <div class="card-label">Income Tax</div>
+          <div id="incomeTaxContent"></div>
+        </div>
+        <div class="card card--examples">
+          <div class="card-label">Take-Home Pay Examples</div>
+          <div id="examplesContent"></div>
+        </div>
+        <div class="card card--other">
+          <div class="card-label">Sales &amp; Property Tax</div>
+          <div id="otherTaxContent"></div>
+        </div>
+        <div class="card card--quirks">
+          <div class="card-label">Notable Tax Facts</div>
+          <div id="quirksContent"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="placeholder" class="placeholder">
+      <div class="placeholder-inner">
+        <span>🗺️</span>
+        <p>Select a state above to explore its tax landscape</p>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>TaxMap is for informational purposes only. Consult a tax professional for personalized advice. Tax data is approximate for the 2024 tax year.</p>
+  </footer>
+
+  <script>
+    // ── Tax Data (2024 Tax Year Estimates) ────────────────────────
+    const TAX_DATA = {
+      AL: { name:"Alabama", emoji:"🌿", tagline:"The Heart of Dixie", incomeTax:{ type:"brackets", brackets:[{min:0,max:500,rate:2},{min:500,max:3000,rate:4},{min:3000,max:null,rate:5}]}, salesTax:{state:4.0,avgLocal:5.24,combined:9.24}, propertyTax:{effective:0.41,note:"One of the lowest in the US"}, quirks:[{icon:"🏠",text:"Property tax is among the lowest in the nation — great for homeowners."},{icon:"🛒",text:"Combined sales tax can exceed 10% in some municipalities."},{icon:"👴",text:"Social Security income is not taxed at the state level."}]},
+      AK: { name:"Alaska", emoji:"🐻", tagline:"The Last Frontier", incomeTax:{type:"none"}, salesTax:{state:0,avgLocal:1.82,combined:1.82}, propertyTax:{effective:1.04,note:"Varies widely; no statewide sales tax"}, quirks:[{icon:"💰",text:"No state income tax AND no statewide sales tax — a true tax haven."},{icon:"🎁",text:"Residents may receive an annual Permanent Fund Dividend (PFD) — a share of oil revenues."},{icon:"🌊",text:"Local governments may levy their own sales taxes up to ~7.5%."}]},
+      AZ: { name:"Arizona", emoji:"🌵", tagline:"The Grand Canyon State", incomeTax:{type:"flat",rate:2.5,note:"Flat rate since 2023"}, salesTax:{state:5.6,avgLocal:2.77,combined:8.37}, propertyTax:{effective:0.51,note:"Below national average"}, quirks:[{icon:"📉",text:"Moved to a flat 2.5% income tax in 2023 — one of the lowest flat rates in the US."},{icon:"🛍️",text:"Food purchased at grocery stores is generally exempt from state sales tax."},{icon:"☀️",text:"No tax on Social Security benefits."}]},
+      AR: { name:"Arkansas", emoji:"🦆", tagline:"The Natural State", incomeTax:{type:"brackets",brackets:[{min:0,max:4400,rate:0},{min:4400,max:8800,rate:4.0},{min:8800,max:null,rate:4.7}]}, salesTax:{state:6.5,avgLocal:2.93,combined:9.43}, propertyTax:{effective:0.63,note:"Moderate rates"}, quirks:[{icon:"📉",text:"Top income tax rate is being gradually reduced — 4.7% as of 2024."},{icon:"🛒",text:"Groceries are taxed at a reduced state rate of 0.125%."},{icon:"💊",text:"Prescription drugs are exempt from sales tax."}]},
+      CA: { name:"California", emoji:"🌴", tagline:"The Golden State", incomeTax:{type:"brackets",brackets:[{min:0,max:10099,rate:1},{min:10099,max:23942,rate:2},{min:23942,max:37788,rate:4},{min:37788,max:52455,rate:6},{min:52455,max:66295,rate:8},{min:66295,max:338639,rate:9.3},{min:338639,max:406364,rate:10.3},{min:406364,max:677275,rate:11.3},{min:677275,max:null,rate:13.3}]}, salesTax:{state:7.25,avgLocal:1.57,combined:8.82}, propertyTax:{effective:0.71,note:"Limited by Prop 13 (assessed at purchase price)"}, quirks:[{icon:"🔝",text:"Highest state income tax in the US at 13.3% for incomes over $1M."},{icon:"🏠",text:"Prop 13 caps property tax increases at 2%/year until the property is sold."},{icon:"🥗",text:"Groceries and prescription drugs are exempt from sales tax."}]},
+      CO: { name:"Colorado", emoji:"🏔️", tagline:"The Centennial State", incomeTax:{type:"flat",rate:4.4,note:"Flat rate for all income levels"}, salesTax:{state:2.9,avgLocal:4.87,combined:7.77}, propertyTax:{effective:0.52,note:"Low effective rate"}, quirks:[{icon:"❄️",text:"TABOR amendment limits state revenue — residents often receive refunds."},{icon:"🏠",text:"Senior citizens may qualify for property tax exemptions."},{icon:"🍃",text:"Colorado taxes recreational marijuana, generating hundreds of millions annually."}]},
+      CT: { name:"Connecticut", emoji:"⚓", tagline:"The Constitution State", incomeTax:{type:"brackets",brackets:[{min:0,max:10000,rate:3.0},{min:10000,max:50000,rate:5.0},{min:50000,max:100000,rate:5.5},{min:100000,max:200000,rate:6.0},{min:200000,max:250000,rate:6.5},{min:250000,max:500000,rate:6.9},{min:500000,max:null,rate:6.99}]}, salesTax:{state:6.35,avgLocal:0,combined:6.35}, propertyTax:{effective:1.79,note:"One of the highest in the US"}, quirks:[{icon:"🏚️",text:"Property taxes are among the highest in the nation."},{icon:"💼",text:"No local income taxes — only state-level."},{icon:"🎰",text:"Gambling winnings are fully taxable as income."}]},
+      DE: { name:"Delaware", emoji:"🦅", tagline:"The First State", incomeTax:{type:"brackets",brackets:[{min:0,max:2000,rate:0},{min:2000,max:5000,rate:2.2},{min:5000,max:10000,rate:3.9},{min:10000,max:20000,rate:4.8},{min:20000,max:25000,rate:5.2},{min:25000,max:60000,rate:5.55},{min:60000,max:null,rate:6.6}]}, salesTax:{state:0,avgLocal:0,combined:0}, propertyTax:{effective:0.54,note:"Low effective rate"}, quirks:[{icon:"🛍️",text:"No sales tax at all — a huge perk for shoppers and businesses."},{icon:"🏢",text:"Major incorporation hub — home to most Fortune 500 companies legally."},{icon:"👴",text:"Generous pension and retirement income exclusions for seniors."}]},
+      FL: { name:"Florida", emoji:"🌴", tagline:"The Sunshine State", incomeTax:{type:"none"}, salesTax:{state:6.0,avgLocal:1.08,combined:7.08}, propertyTax:{effective:0.80,note:"Homestead exemption available"}, quirks:[{icon:"☀️",text:"No state income tax — a major draw for retirees and high earners."},{icon:"🏠",text:"Homestead Exemption can reduce taxable home value by up to $50,000."},{icon:"🎪",text:"Amusement park admissions (like Disney) are taxed with sales tax."}]},
+      GA: { name:"Georgia", emoji:"🍑", tagline:"The Peach State", incomeTax:{type:"flat",rate:5.49,note:"Transitioning to flat rate, heading to 4.99%"}, salesTax:{state:4.0,avgLocal:3.35,combined:7.35}, propertyTax:{effective:0.86,note:"Homestead exemptions available"}, quirks:[{icon:"📉",text:"Moving to a flat income tax rate, with plans to lower it to 4.99% by 2029."},{icon:"🎬",text:"Generous film tax credits make Georgia a major production hub."},{icon:"🧃",text:"Groceries are exempt from state sales tax but subject to local taxes."}]},
+      HI: { name:"Hawaii", emoji:"🌺", tagline:"The Aloha State", incomeTax:{type:"brackets",brackets:[{min:0,max:2400,rate:1.4},{min:2400,max:4800,rate:3.2},{min:4800,max:9600,rate:5.5},{min:9600,max:14400,rate:6.4},{min:14400,max:19200,rate:6.8},{min:19200,max:24000,rate:7.2},{min:24000,max:36000,rate:7.6},{min:36000,max:48000,rate:7.9},{min:48000,max:150000,rate:8.25},{min:150000,max:175000,rate:9.0},{min:175000,max:200000,rate:10.0},{min:200000,max:null,rate:11.0}]}, salesTax:{state:4.0,avgLocal:0.44,combined:4.44,note:"Called General Excise Tax (GET)"}, propertyTax:{effective:0.27,note:"Lowest effective rate in the US"}, quirks:[{icon:"🏝️",text:"Lowest property tax rate in the entire US."},{icon:"💼",text:"The General Excise Tax (GET) is applied at every stage of production — not just retail."},{icon:"🌋",text:"High cost of living means effective tax burden is very high despite moderate rates."}]},
+      ID: { name:"Idaho", emoji:"🥔", tagline:"The Gem State", incomeTax:{type:"flat",rate:5.8,note:"Flat rate since 2023"}, salesTax:{state:6.0,avgLocal:0.03,combined:6.03}, propertyTax:{effective:0.69,note:"Below national average"}, quirks:[{icon:"📦",text:"Groceries are taxed at the full sales tax rate, but a grocery credit offsets this."},{icon:"🌿",text:"No taxes on Social Security benefits."},{icon:"🏠",text:"Homeowner's exemption reduces assessed value of primary residences."}]},
+      IL: { name:"Illinois", emoji:"🌽", tagline:"The Prairie State", incomeTax:{type:"flat",rate:4.95,note:"Flat rate mandated by state constitution"}, salesTax:{state:6.25,avgLocal:2.49,combined:8.74}, propertyTax:{effective:2.08,note:"Second highest in the US"}, quirks:[{icon:"🏠",text:"Property taxes are the second highest in the nation — a major cost for homeowners."},{icon:"📜",text:"State constitution requires a flat income tax — graduated rates would need a constitutional amendment."},{icon:"💊",text:"Groceries are taxed at a reduced 1% rate; prescription drugs are exempt."}]},
+      IN: { name:"Indiana", emoji:"🏎️", tagline:"The Hoosier State", incomeTax:{type:"flat",rate:3.05,note:"Being gradually reduced to 2.9% by 2027"}, salesTax:{state:7.0,avgLocal:0,combined:7.0}, propertyTax:{effective:0.85,note:"Cap of 1% for homesteads"}, quirks:[{icon:"📉",text:"One of the lowest flat income tax rates in the country, and it's still being reduced."},{icon:"🏠",text:"Property taxes are constitutionally capped at 1% of assessed value for owner-occupied homes."},{icon:"🚗",text:"No local sales taxes — the state rate is uniform statewide."}]},
+      IA: { name:"Iowa", emoji:"🌾", tagline:"The Hawkeye State", incomeTax:{type:"flat",rate:3.8,note:"Flat rate as of 2025, heading to 3.5%"}, salesTax:{state:6.0,avgLocal:0.94,combined:6.94}, propertyTax:{effective:1.57,note:"Among the higher rates in the Midwest"}, quirks:[{icon:"📉",text:"Moving to a flat 3.8% rate in 2025, with further reductions planned."},{icon:"🌽",text:"Machinery used in farming is generally exempt from sales tax."},{icon:"👴",text:"Retirement income (including Social Security) is fully exempt from state income tax."}]},
+      KS: { name:"Kansas", emoji:"🌻", tagline:"The Sunflower State", incomeTax:{type:"brackets",brackets:[{min:0,max:15000,rate:3.1},{min:15000,max:30000,rate:5.25},{min:30000,max:null,rate:5.7}]}, salesTax:{state:6.5,avgLocal:2.22,combined:8.72}, propertyTax:{effective:1.41,note:"Above national average"}, quirks:[{icon:"🥗",text:"Kansas eliminated its grocery sales tax in 2024 — a significant consumer saving."},{icon:"🏠",text:"Homestead property tax refund available for lower-income residents."},{icon:"🌾",text:"Agricultural land is assessed at a lower rate than residential property."}]},
+      KY: { name:"Kentucky", emoji:"🐴", tagline:"The Bluegrass State", incomeTax:{type:"flat",rate:4.0,note:"Reduced from 4.5% in 2024"}, salesTax:{state:6.0,avgLocal:0,combined:6.0}, propertyTax:{effective:0.86,note:"No local sales tax"}, quirks:[{icon:"🥃",text:"Kentucky whiskey (bourbon) is subject to a unique barrel tax while aging in warehouses."},{icon:"🎰",text:"Horse racing and gambling winnings are taxable income."},{icon:"📉",text:"Income tax rate is being phased down — aiming for elimination long-term."}]},
+      LA: { name:"Louisiana", emoji:"🎺", tagline:"The Pelican State", incomeTax:{type:"brackets",brackets:[{min:0,max:12500,rate:1.85},{min:12500,max:50000,rate:3.5},{min:50000,max:null,rate:4.25}]}, salesTax:{state:4.45,avgLocal:5.1,combined:9.55,note:"Highest combined in the US"}, propertyTax:{effective:0.56,note:"Low effective rate with homestead exemption"}, quirks:[{icon:"🛒",text:"Highest combined sales tax in the country — local rates can push it over 10%."},{icon:"🏠",text:"Homestead exemption removes the first $75,000 of home value from property taxes."},{icon:"🎶",text:"No state taxes on food or prescription drugs purchased for home consumption."}]},
+      ME: { name:"Maine", emoji:"🦞", tagline:"The Pine Tree State", incomeTax:{type:"brackets",brackets:[{min:0,max:24500,rate:5.8},{min:24500,max:58050,rate:6.75},{min:58050,max:null,rate:7.15}]}, salesTax:{state:5.5,avgLocal:0,combined:5.5}, propertyTax:{effective:1.36,note:"Above national average"}, quirks:[{icon:"🦞",text:"No local sales taxes — the 5.5% rate is uniform statewide."},{icon:"🌲",text:"Maine has a unique tree growth tax program — forests taxed at lower rates."},{icon:"👴",text:"Pension income from the state/federal government is partially exempt."}]},
+      MD: { name:"Maryland", emoji:"🦀", tagline:"The Old Line State", incomeTax:{type:"brackets",brackets:[{min:0,max:1000,rate:2.0},{min:1000,max:2000,rate:3.0},{min:2000,max:3000,rate:4.0},{min:3000,max:100000,rate:4.75},{min:100000,max:125000,rate:5.0},{min:125000,max:150000,rate:5.25},{min:150000,max:250000,rate:5.5},{min:250000,max:null,rate:5.75}]}, salesTax:{state:6.0,avgLocal:0,combined:6.0}, propertyTax:{effective:1.05,note:"Homestead credit available"}, quirks:[{icon:"🏙️",text:"Counties also impose their own income taxes (1.75%–3.2%), increasing the real burden."},{icon:"🦀",text:"No sales tax on groceries or prescription drugs."},{icon:"🎓",text:"Income tax credit available for college loan debt repayments."}]},
+      MA: { name:"Massachusetts", emoji:"🦃", tagline:"The Bay State", incomeTax:{type:"flat",rate:5.0,note:"Plus 4% surtax on income over $1M (Millionaire's Tax)"}, salesTax:{state:6.25,avgLocal:0,combined:6.25}, propertyTax:{effective:1.14,note:"Varies by municipality"}, quirks:[{icon:"💎",text:"A 4% surtax applies to income over $1 million — effective top rate of 9%."},{icon:"🛍️",text:"Clothing under $175 per item is exempt from sales tax."},{icon:"☕",text:"No tax on groceries, but meals/restaurant food is taxed at 6.25%."}]},
+      MI: { name:"Michigan", emoji:"🚗", tagline:"The Great Lakes State", incomeTax:{type:"flat",rate:4.25,note:"Flat rate; some cities add local tax"}, salesTax:{state:6.0,avgLocal:0,combined:6.0}, propertyTax:{effective:1.54,note:"Above national average"}, quirks:[{icon:"🏙️",text:"Detroit imposes its own city income tax (2.4% for residents, 1.2% non-residents)."},{icon:"🥗",text:"Groceries and prescription drugs are exempt from sales tax."},{icon:"👴",text:"Pension income has partial exemption depending on birth year."}]},
+      MN: { name:"Minnesota", emoji:"🌊", tagline:"The Land of 10,000 Lakes", incomeTax:{type:"brackets",brackets:[{min:0,max:30070,rate:5.35},{min:30070,max:98760,rate:6.8},{min:98760,max:183340,rate:7.85},{min:183340,max:null,rate:9.85}]}, salesTax:{state:6.875,avgLocal:0.58,combined:7.46}, propertyTax:{effective:1.12,note:"Homestead credit available"}, quirks:[{icon:"❄️",text:"One of the highest top income tax rates in the Midwest at 9.85%."},{icon:"👗",text:"Clothing is exempt from sales tax — a notable consumer benefit."},{icon:"🌽",text:"Groceries are generally exempt from sales tax."}]},
+      MS: { name:"Mississippi", emoji:"🎸", tagline:"The Magnolia State", incomeTax:{type:"flat",rate:4.7,note:"Phasing down to 4% by 2026"}, salesTax:{state:7.0,avgLocal:0.07,combined:7.07}, propertyTax:{effective:0.8,note:"Below national average"}, quirks:[{icon:"🛒",text:"Groceries are taxed at a reduced 7% — one of only a few states that still taxes food."},{icon:"📉",text:"Income tax being phased down toward eventual elimination."},{icon:"💊",text:"Prescription drugs are exempt from sales tax."}]},
+      MO: { name:"Missouri", emoji:"🌉", tagline:"The Show Me State", incomeTax:{type:"brackets",brackets:[{min:0,max:1207,rate:0},{min:1207,max:2414,rate:2.0},{min:2414,max:3621,rate:2.5},{min:3621,max:4828,rate:3.0},{min:4828,max:6035,rate:3.5},{min:6035,max:7242,rate:4.0},{min:7242,max:8432,rate:4.5},{min:8432,max:null,rate:4.8}]}, salesTax:{state:4.225,avgLocal:4.07,combined:8.29}, propertyTax:{effective:1.01,note:"Near national average"}, quirks:[{icon:"🏙️",text:"Kansas City and St. Louis impose their own earnings taxes (1%) on top of state taxes."},{icon:"👴",text:"Social Security income is partially deductible depending on income level."},{icon:"🌾",text:"Agriculture equipment generally exempt from sales tax."}]},
+      MT: { name:"Montana", emoji:"🦌", tagline:"Big Sky Country", incomeTax:{type:"brackets",brackets:[{min:0,max:3600,rate:1.0},{min:3600,max:6300,rate:2.0},{min:6300,max:9700,rate:3.0},{min:9700,max:13000,rate:4.0},{min:13000,max:16800,rate:5.0},{min:16800,max:21600,rate:6.0},{min:21600,max:null,rate:6.75}]}, salesTax:{state:0,avgLocal:0,combined:0}, propertyTax:{effective:0.74,note:"No sales tax offsets income tax burden"}, quirks:[{icon:"🛍️",text:"No sales tax statewide — great for big purchases."},{icon:"🏕️",text:"Resort taxes are allowed in tourist towns like Whitefish and Big Sky."},{icon:"🚜",text:"Agricultural property is assessed at a lower mill rate."}]},
+      NE: { name:"Nebraska", emoji:"🌽", tagline:"The Cornhusker State", incomeTax:{type:"brackets",brackets:[{min:0,max:3700,rate:2.46},{min:3700,max:22170,rate:3.51},{min:22170,max:35730,rate:5.01},{min:35730,max:null,rate:5.84}]}, salesTax:{state:5.5,avgLocal:1.44,combined:6.94}, propertyTax:{effective:1.67,note:"Among the highest in the nation"}, quirks:[{icon:"🏠",text:"Property taxes are among the highest in the Midwest — a burden for homeowners."},{icon:"📉",text:"Legislature has been actively working to reduce income and property tax rates."},{icon:"🌽",text:"Ag land is assessed separately at a lower rate than residential property."}]},
+      NV: { name:"Nevada", emoji:"🎰", tagline:"The Silver State", incomeTax:{type:"none"}, salesTax:{state:6.85,avgLocal:1.38,combined:8.23}, propertyTax:{effective:0.55,note:"Below national average"}, quirks:[{icon:"🎰",text:"No state income tax — funded largely by gaming and tourism revenue."},{icon:"🛒",text:"Groceries are exempt from state sales tax, but counties can add their own tax on food."},{icon:"🏠",text:"Property taxes are kept low by an abatement program that caps increases at 3%/year."}]},
+      NH: { name:"New Hampshire", emoji:"🍁", tagline:"The Granite State", incomeTax:{type:"flat",rate:3.0,note:"Only on interest & dividends; being phased out by 2025"}, salesTax:{state:0,avgLocal:0,combined:0}, propertyTax:{effective:1.93,note:"Third highest in the US"}, quirks:[{icon:"📉",text:"The interest & dividends tax is being eliminated — NH will soon have no income tax."},{icon:"🛍️",text:"No sales tax — great for shopping, but property taxes are very high to compensate."},{icon:"🏠",text:"One of the highest property tax rates in the nation."}]},
+      NJ: { name:"New Jersey", emoji:"🌊", tagline:"The Garden State", incomeTax:{type:"brackets",brackets:[{min:0,max:20000,rate:1.4},{min:20000,max:35000,rate:1.75},{min:35000,max:40000,rate:3.5},{min:40000,max:75000,rate:5.525},{min:75000,max:500000,rate:6.37},{min:500000,max:1000000,rate:8.97},{min:1000000,max:null,rate:10.75}]}, salesTax:{state:6.625,avgLocal:-0.03,combined:6.6}, propertyTax:{effective:2.23,note:"Highest in the US"}, quirks:[{icon:"🏠",text:"Highest property taxes in the entire nation — averaging over $9,000/year."},{icon:"🧥",text:"Most clothing items are exempt from sales tax."},{icon:"🥗",text:"Groceries and prescription drugs are not subject to sales tax."}]},
+      NM: { name:"New Mexico", emoji:"🌶️", tagline:"The Land of Enchantment", incomeTax:{type:"brackets",brackets:[{min:0,max:5500,rate:1.7},{min:5500,max:11000,rate:3.2},{min:11000,max:16000,rate:4.7},{min:16000,max:210000,rate:4.9},{min:210000,max:null,rate:5.9}]}, salesTax:{state:5.0,avgLocal:2.72,combined:7.72}, propertyTax:{effective:0.67,note:"Below national average"}, quirks:[{icon:"🌵",text:"Groceries are taxed but at a reduced rate — a partial rebate is available for low-income residents."},{icon:"🛢️",text:"Oil and gas revenues provide significant state funding, reducing individual tax burden."},{icon:"👴",text:"Social Security income is exempt from state income tax for most residents."}]},
+      NY: { name:"New York", emoji:"🗽", tagline:"The Empire State", incomeTax:{type:"brackets",brackets:[{min:0,max:8500,rate:4.0},{min:8500,max:11700,rate:4.5},{min:11700,max:13900,rate:5.25},{min:13900,max:80650,rate:5.5},{min:80650,max:215400,rate:6.0},{min:215400,max:1077550,rate:6.85},{min:1077550,max:5000000,rate:9.65},{min:5000000,max:25000000,rate:10.3},{min:25000000,max:null,rate:10.9}]}, salesTax:{state:4.0,avgLocal:4.52,combined:8.52}, propertyTax:{effective:1.54,note:"NYC adds its own income tax on top"}, quirks:[{icon:"🏙️",text:"NYC residents pay an additional city income tax of 3.078%–3.876% on top of state tax."},{icon:"🧁",text:"Bagels are taxed differently if sliced or with cream cheese — uniquely NY tax law."},{icon:"👗",text:"Clothing under $110 per item is exempt from state sales tax."}]},
+      NC: { name:"North Carolina", emoji:"🏀", tagline:"The Tar Heel State", incomeTax:{type:"flat",rate:4.5,note:"Phasing down to 3.99% by 2026"}, salesTax:{state:4.75,avgLocal:2.22,combined:6.97}, propertyTax:{effective:0.80,note:"Below national average"}, quirks:[{icon:"📉",text:"Income tax rate is actively being reduced — one of the fastest-changing in the country."},{icon:"🛒",text:"Groceries are taxed at a reduced 2% state rate."},{icon:"💊",text:"Prescription drugs are fully exempt from sales tax."}]},
+      ND: { name:"North Dakota", emoji:"🌾", tagline:"The Peace Garden State", incomeTax:{type:"brackets",brackets:[{min:0,max:44725,rate:1.1},{min:44725,max:225975,rate:2.04},{min:225975,max:null,rate:2.9}]}, salesTax:{state:5.0,avgLocal:1.85,combined:6.85}, propertyTax:{effective:0.98,note:"Near national average"}, quirks:[{icon:"🛢️",text:"Oil production revenues help keep taxes low for residents."},{icon:"🏠",text:"Homestead credit available for elderly and disabled homeowners."},{icon:"🌾",text:"Agricultural machinery and equipment exempt from sales tax."}]},
+      OH: { name:"Ohio", emoji:"🌰", tagline:"The Buckeye State", incomeTax:{type:"brackets",brackets:[{min:0,max:26050,rate:0},{min:26050,max:100000,rate:2.765},{min:100000,max:115300,rate:3.226},{min:115300,max:null,rate:3.688}]}, salesTax:{state:5.75,avgLocal:1.48,combined:7.23}, propertyTax:{effective:1.62,note:"Above national average"}, quirks:[{icon:"🏙️",text:"Many Ohio cities impose their own municipal income taxes (0.5%–3%)."},{icon:"🥗",text:"Groceries and prescription drugs are exempt from sales tax."},{icon:"📉",text:"No income tax on the first $26,050 of income."}]},
+      OK: { name:"Oklahoma", emoji:"🌪️", tagline:"The Sooner State", incomeTax:{type:"brackets",brackets:[{min:0,max:1000,rate:0.25},{min:1000,max:2500,rate:0.75},{min:2500,max:3750,rate:1.75},{min:3750,max:4900,rate:2.75},{min:4900,max:7200,rate:3.75},{min:7200,max:null,rate:4.75}]}, salesTax:{state:4.5,avgLocal:4.47,combined:8.97}, propertyTax:{effective:0.90,note:"Below national average"}, quirks:[{icon:"⛽",text:"Oklahoma has a gross production tax on oil and gas — helps offset income taxes."},{icon:"🛒",text:"Groceries are taxed at the full rate, though some credits exist for low-income filers."},{icon:"👴",text:"Social Security benefits are exempt from income tax."}]},
+      OR: { name:"Oregon", emoji:"🌲", tagline:"The Beaver State", incomeTax:{type:"brackets",brackets:[{min:0,max:4050,rate:4.75},{min:4050,max:10200,rate:6.75},{min:10200,max:125000,rate:8.75},{min:125000,max:null,rate:9.9}]}, salesTax:{state:0,avgLocal:0,combined:0}, propertyTax:{effective:0.93,note:"Measure 5 caps rates"}, quirks:[{icon:"🛍️",text:"No sales tax statewide — Oregon and a few others are outliers in the US."},{icon:"📈",text:"High income taxes compensate for no sales tax revenue."},{icon:"🏙️",text:"Portland Metro area imposes its own income tax for supportive housing services."}]},
+      PA: { name:"Pennsylvania", emoji:"🔔", tagline:"The Keystone State", incomeTax:{type:"flat",rate:3.07,note:"One of the lowest flat rates in the US"}, salesTax:{state:6.0,avgLocal:0.34,combined:6.34}, propertyTax:{effective:1.58,note:"Above national average"}, quirks:[{icon:"🏙️",text:"Philadelphia imposes its own wage tax (3.79% for residents, 3.44% non-residents)."},{icon:"👴",text:"Retirement income (pensions, 401(k), Social Security) is fully exempt from PA income tax."},{icon:"🥗",text:"Most food and clothing is exempt from PA sales tax."}]},
+      RI: { name:"Rhode Island", emoji:"⚓", tagline:"The Ocean State", incomeTax:{type:"brackets",brackets:[{min:0,max:73450,rate:3.75},{min:73450,max:166950,rate:4.75},{min:166950,max:null,rate:5.99}]}, salesTax:{state:7.0,avgLocal:0,combined:7.0}, propertyTax:{effective:1.53,note:"Above national average"}, quirks:[{icon:"🦞",text:"No local sales taxes — the statewide rate is uniform."},{icon:"🛒",text:"Most food for home consumption is exempt from the sales tax."},{icon:"🎰",text:"Rhode Island's state lottery and Twin River casinos generate significant revenue."}]},
+      SC: { name:"South Carolina", emoji:"🍑", tagline:"The Palmetto State", incomeTax:{type:"brackets",brackets:[{min:0,max:3460,rate:0},{min:3460,max:17330,rate:3.0},{min:17330,max:null,rate:6.4}]}, salesTax:{state:6.0,avgLocal:1.43,combined:7.43}, propertyTax:{effective:0.57,note:"Low effective rate; large homestead exemption"}, quirks:[{icon:"🏠",text:"Large homestead exemption for residents age 65+ — first $50,000 exempt."},{icon:"📉",text:"Top income tax rate is being reduced from 7% toward 6.4% and lower."},{icon:"🌊",text:"Retirement income exclusion up to $10,000 for those 65 and older."}]},
+      SD: { name:"South Dakota", emoji:"🦬", tagline:"The Mount Rushmore State", incomeTax:{type:"none"}, salesTax:{state:4.2,avgLocal:1.9,combined:6.1}, propertyTax:{effective:1.14,note:"Near national average"}, quirks:[{icon:"💰",text:"No income tax — South Dakota is popular for trusts and business incorporation."},{icon:"🏛️",text:"No state estate or inheritance tax."},{icon:"🐄",text:"Agricultural land is assessed at lower rates to support farming communities."}]},
+      TN: { name:"Tennessee", emoji:"🎸", tagline:"The Volunteer State", incomeTax:{type:"none",note:"Hall income tax on dividends/interest was eliminated in 2021"}, salesTax:{state:7.0,avgLocal:2.55,combined:9.55,note:"Second highest combined in US"}, propertyTax:{effective:0.66,note:"Below national average"}, quirks:[{icon:"🎸",text:"No income tax — but sales taxes are among the highest in the country."},{icon:"🛒",text:"Groceries are taxed at a reduced 4% state rate (but local taxes apply on top)."},{icon:"🏠",text:"Property taxes are quite low, especially compared to northeastern states."}]},
+      TX: { name:"Texas", emoji:"⭐", tagline:"The Lone Star State", incomeTax:{type:"none"}, salesTax:{state:6.25,avgLocal:1.95,combined:8.2}, propertyTax:{effective:1.74,note:"Among the highest in the US"}, quirks:[{icon:"💰",text:"No state income tax — but property taxes are very high to fund local services."},{icon:"🏠",text:"Homestead exemption reduces taxable value; school district taxes are significant."},{icon:"🤠",text:"Texas has a franchise tax (gross receipts tax) on businesses instead of corporate income tax."}]},
+      UT: { name:"Utah", emoji:"🏜️", tagline:"The Beehive State", incomeTax:{type:"flat",rate:4.55,note:"Flat rate for all income"}, salesTax:{state:6.1,avgLocal:1.09,combined:7.19}, propertyTax:{effective:0.56,note:"Below national average"}, quirks:[{icon:"⛷️",text:"Utah has one of the fastest-growing economies in the US with competitive tax rates."},{icon:"🥗",text:"Groceries are taxed at a reduced 3% rate (state portion only)."},{icon:"👶",text:"Dependent exemption credit is available per child, reducing tax burden for families."}]},
+      VT: { name:"Vermont", emoji:"🍁", tagline:"The Green Mountain State", incomeTax:{type:"brackets",brackets:[{min:0,max:45400,rate:3.35},{min:45400,max:110650,rate:6.6},{min:110650,max:229550,rate:7.6},{min:229550,max:null,rate:8.75}]}, salesTax:{state:6.0,avgLocal:0.18,combined:6.18}, propertyTax:{effective:1.90,note:"Second highest in New England"}, quirks:[{icon:"🏔️",text:"Property taxes are among the highest in the nation."},{icon:"🍺",text:"Vermont taxes meals and alcoholic beverages at 9%."},{icon:"🏠",text:"Vermont's education fund is largely funded through property taxes."}]},
+      VA: { name:"Virginia", emoji:"🦅", tagline:"The Old Dominion", incomeTax:{type:"brackets",brackets:[{min:0,max:3000,rate:2.0},{min:3000,max:5000,rate:3.0},{min:5000,max:17000,rate:5.0},{min:17000,max:null,rate:5.75}]}, salesTax:{state:5.3,avgLocal:0.35,combined:5.65,note:"NOVA and Hampton Roads add extra 0.7%"}, propertyTax:{effective:0.87,note:"Below national average"}, quirks:[{icon:"🏛️",text:"The DC suburbs (NOVA) have a higher combined sales tax rate of 6.0%."},{icon:"🥗",text:"Groceries reduced to 1% state sales tax as of 2023."},{icon:"👴",text:"Individuals 65+ can subtract up to $12,000 in retirement income."}]},
+      WA: { name:"Washington", emoji:"🌧️", tagline:"The Evergreen State", incomeTax:{type:"none",note:"A capital gains tax of 7% applies on gains over $250,000"}, salesTax:{state:6.5,avgLocal:2.72,combined:9.22}, propertyTax:{effective:0.94,note:"Near national average"}, quirks:[{icon:"💻",text:"No income tax, but a 7% capital gains tax on gains over $250K was upheld by courts in 2023."},{icon:"🛒",text:"Groceries are exempt from sales tax, but the combined rate is still high on other goods."},{icon:"⚖️",text:"Washington has a Business & Occupation (B&O) tax — a gross receipts tax on businesses."}]},
+      WV: { name:"West Virginia", emoji:"⛰️", tagline:"The Mountain State", incomeTax:{type:"brackets",brackets:[{min:0,max:10000,rate:3.0},{min:10000,max:25000,rate:4.0},{min:25000,max:40000,rate:4.5},{min:40000,max:60000,rate:6.0},{min:60000,max:null,rate:6.5}]}, salesTax:{state:6.0,avgLocal:0.39,combined:6.39}, propertyTax:{effective:0.57,note:"Low effective rate"}, quirks:[{icon:"🪨",text:"Coal severance tax generates significant state revenue."},{icon:"📉",text:"Legislature has been reducing income tax rates to attract workers and businesses."},{icon:"💊",text:"Prescription drugs are exempt from sales tax."}]},
+      WI: { name:"Wisconsin", emoji:"🧀", tagline:"The Badger State", incomeTax:{type:"brackets",brackets:[{min:0,max:13810,rate:3.5},{min:13810,max:27630,rate:4.4},{min:27630,max:304170,rate:5.3},{min:304170,max:null,rate:7.65}]}, salesTax:{state:5.0,avgLocal:0.43,combined:5.43}, propertyTax:{effective:1.61,note:"Above national average"}, quirks:[{icon:"🧀",text:"Wisconsin is a major dairy state — farm equipment and inputs get tax exemptions."},{icon:"🏠",text:"Property taxes are high, particularly in Milwaukee and Madison areas."},{icon:"🛒",text:"Groceries are generally exempt from sales tax."}]},
+      WY: { name:"Wyoming", emoji:"🦬", tagline:"The Cowboy State", incomeTax:{type:"none"}, salesTax:{state:4.0,avgLocal:1.36,combined:5.36}, propertyTax:{effective:0.57,note:"Low effective rate"}, quirks:[{icon:"🛢️",text:"No income tax — funded significantly by mineral severance taxes (coal, oil, gas)."},{icon:"🏛️",text:"No corporate income tax and no estate tax."},{icon:"🤠",text:"One of the most tax-friendly states for businesses and high-net-worth individuals."}]},
+      DC: { name:"Washington D.C.", emoji:"🏛️", tagline:"The Nation's Capital", incomeTax:{type:"brackets",brackets:[{min:0,max:10000,rate:4.0},{min:10000,max:40000,rate:6.0},{min:40000,max:60000,rate:6.5},{min:60000,max:250000,rate:8.5},{min:250000,max:500000,rate:9.25},{min:500000,max:1000000,rate:9.75},{min:1000000,max:null,rate:10.75}]}, salesTax:{state:6.0,avgLocal:0,combined:6.0}, propertyTax:{effective:0.55,note:"Homestead deduction and senior citizen credits available"}, quirks:[{icon:"🏛️",text:"DC residents pay federal taxes but have no voting representation in Congress."},{icon:"🍽️",text:"Restaurant meals and alcohol are taxed at 10% — higher than general sales tax."},{icon:"🏠",text:"Homestead deduction reduces the taxable value of owner-occupied homes by $84,000+."}]}
+    };
+
+    // ── App Logic ─────────────────────────────────────────────────
+
+    const FEDERAL_STANDARD_DEDUCTION = 14600;
+
+    const select = document.getElementById("stateSelect");
+    const stateOrder = Object.keys(TAX_DATA).sort((a, b) => TAX_DATA[a].name.localeCompare(TAX_DATA[b].name));
+    stateOrder.forEach(code => {
+      const opt = document.createElement("option");
+      opt.value = code;
+      opt.textContent = `${TAX_DATA[code].emoji}  ${TAX_DATA[code].name}`;
+      select.appendChild(opt);
+    });
+
+    select.addEventListener("change", () => {
+      const code = select.value;
+      if (!code) {
+        document.getElementById("taxContent").classList.add("hidden");
+        document.getElementById("placeholder").classList.remove("hidden");
+        return;
+      }
+      renderState(code);
+    });
+
+    function calcStateTax(gross, it) {
+      if (it.type === "none") return 0;
+      const taxable = Math.max(0, gross - FEDERAL_STANDARD_DEDUCTION);
+      if (it.type === "flat") return taxable * (it.rate / 100);
+      let tax = 0;
+      for (const b of it.brackets) {
+        if (taxable <= b.min) break;
+        const upper = b.max !== null ? b.max : Infinity;
+        tax += (Math.min(taxable, upper) - b.min) * (b.rate / 100);
+      }
+      return tax;
+    }
+
+    function calcFederalTax(gross) {
+      const taxable = Math.max(0, gross - FEDERAL_STANDARD_DEDUCTION);
+      const brackets = [{min:0,max:11600,rate:0.10},{min:11600,max:47150,rate:0.12},{min:47150,max:100525,rate:0.22},{min:100525,max:191950,rate:0.24},{min:191950,max:243725,rate:0.32},{min:243725,max:609350,rate:0.35},{min:609350,max:Infinity,rate:0.37}];
+      let tax = 0;
+      for (const b of brackets) {
+        if (taxable <= b.min) break;
+        tax += (Math.min(taxable, b.max) - b.min) * b.rate;
+      }
+      return tax;
+    }
+
+    function calcFICA(gross) {
+      return Math.min(gross, 168600) * 0.062 + gross * 0.0145;
+    }
+
+    function fmt(n) { return "$" + Math.round(n).toLocaleString(); }
+    function fmtPct(n) { return n.toFixed(1) + "%"; }
+
+    function renderState(code) {
+      const d = TAX_DATA[code];
+      document.getElementById("stateEmoji").textContent = d.emoji;
+      document.getElementById("stateName").textContent = d.name;
+      document.getElementById("stateTagline").textContent = d.tagline;
+      renderQuickStats(d); renderIncomeTax(d); renderExamples(d); renderOtherTax(d); renderQuirks(d);
+      document.getElementById("placeholder").classList.add("hidden");
+      const content = document.getElementById("taxContent");
+      content.classList.remove("hidden");
+      content.querySelectorAll(".card").forEach(c => { c.style.animation = "none"; requestAnimationFrame(() => { c.style.animation = ""; }); });
+    }
+
+    function renderQuickStats(d) {
+      let val, label;
+      if (d.incomeTax.type === "none") { val = "0%"; label = "Income Tax"; }
+      else if (d.incomeTax.type === "flat") { val = fmtPct(d.incomeTax.rate); label = "Flat Rate"; }
+      else { val = fmtPct(d.incomeTax.brackets[d.incomeTax.brackets.length - 1].rate); label = "Top Rate"; }
+      document.getElementById("quickStats").innerHTML = `
+        <div class="quick-stat"><div class="quick-stat-value">${val}</div><div class="quick-stat-label">${label}</div></div>
+        <div class="quick-stat"><div class="quick-stat-value">${fmtPct(d.salesTax.combined)}</div><div class="quick-stat-label">Sales Tax</div></div>
+        <div class="quick-stat"><div class="quick-stat-value">${fmtPct(d.propertyTax.effective)}</div><div class="quick-stat-label">Prop. Tax</div></div>`;
+    }
+
+    function renderIncomeTax(d) {
+      const it = d.incomeTax; let html = "";
+      if (it.type === "none") {
+        html = `<span class="tax-type-badge badge--none">No Income Tax</span><p class="no-tax-message">${d.name} does not levy a state income tax.<br>One of only 9 states with this distinction.</p>${it.note ? `<p style="margin-top:.75rem;font-size:.8rem;color:var(--ink-faint);font-style:italic">${it.note}</p>` : ""}`;
+      } else if (it.type === "flat") {
+        html = `<span class="tax-type-badge badge--flat">Flat Rate</span><div class="flat-rate">${fmtPct(it.rate)}</div><p class="flat-desc">Applied to all taxable income equally.</p>${it.note ? `<p style="margin-top:.5rem;font-size:.8rem;color:var(--ink-faint);font-style:italic">${it.note}</p>` : ""}`;
+      } else {
+        const rows = it.brackets.map(b => `<tr><td>${fmt(b.min)} – ${b.max !== null ? fmt(b.max) : "and up"}</td><td>${fmtPct(b.rate)}</td></tr>`).join("");
+        html = `<span class="tax-type-badge badge--brackets">Progressive Brackets</span><table class="brackets-table"><thead><tr><th>Income Range</th><th>Rate</th></tr></thead><tbody>${rows}</tbody></table>`;
+      }
+      document.getElementById("incomeTaxContent").innerHTML = html;
+    }
+
+    function renderExamples(d) {
+      const rows = [40000, 75000, 120000, 200000].map(income => {
+        const total = calcStateTax(income, d.incomeTax) + calcFederalTax(income) + calcFICA(income);
+        const th = income - total, pct = (th / income) * 100;
+        return `<div class="example-row"><div class="example-income">${fmt(income)}</div><div class="example-bar-wrap"><div class="example-bar" style="width:${Math.round(pct)}%"></div></div><div class="example-takehome">${fmt(th)}</div><div class="example-pct">${fmtPct(pct)}</div></div>`;
+      }).join("");
+      document.getElementById("examplesContent").innerHTML = `<div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-faint);margin-bottom:.25rem"><span>Gross</span><span>Take-home</span></div>${rows}<p class="example-note">Estimates include federal income tax, FICA (7.65%), and state income tax. Standard deduction applied. Does not include local taxes.</p>`;
+    }
+
+    function renderOtherTax(d) {
+      const s = d.salesTax, p = d.propertyTax;
+      document.getElementById("otherTaxContent").innerHTML = `
+        <div class="tax-row"><div class="tax-row-label"><strong>State Sales Tax</strong>Base rate set by the state</div><div class="tax-row-value">${fmtPct(s.state)}</div></div>
+        <div class="tax-row"><div class="tax-row-label"><strong>Avg. Local Sales Tax</strong>County / city additions</div><div class="tax-row-value">${fmtPct(s.avgLocal)}</div></div>
+        <div class="tax-row"><div class="tax-row-label"><strong>Combined Sales Tax</strong>${s.note || "State + average local rate"}</div><div class="tax-row-value">${fmtPct(s.combined)}</div></div>
+        <div class="tax-row"><div class="tax-row-label"><strong>Effective Property Tax</strong>${p.note}</div><div class="tax-row-value">${fmtPct(p.effective)}</div></div>`;
+    }
+
+    function renderQuirks(d) {
+      document.getElementById("quirksContent").innerHTML = d.quirks.map(q => `<div class="quirk-item"><span class="quirk-icon">${q.icon}</span><p class="quirk-text">${q.text}</p></div>`).join("");
+    }
+  </script>
+</body>
+</html>
