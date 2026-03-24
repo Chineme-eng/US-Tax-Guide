@@ -66,6 +66,8 @@
     .filing-toggle button { flex: 1; padding: 0.6rem 0.5rem; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.06em; background: var(--bg-card); color: var(--ink-muted); border: none; cursor: pointer; transition: background 0.15s, color 0.15s; border-right: 1px solid var(--border-strong); }
     .filing-toggle button:last-child { border-right: none; }
     .filing-toggle button.active { background: var(--ink); color: #fff; }
+    .local-tax-wrap { display: flex; flex-direction: column; gap: 0.4rem; }
+    .local-tax-note { font-size: 0.72rem; color: var(--ink-faint); line-height: 1.5; }
 
     /* State header */
     .state-header { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; margin-bottom: 1.75rem; flex-wrap: wrap; }
@@ -221,6 +223,14 @@
           <button data-status="hoh">Head of Household</button>
         </div>
       </div>
+      <div class="local-tax-wrap hidden" id="localTaxWrap">
+        <label for="localTaxSelect">City / local income tax</label>
+        <div class="select-outer">
+          <select id="localTaxSelect"></select>
+          <span class="select-arrow">↓</span>
+        </div>
+        <p class="local-tax-note" id="localTaxNote"></p>
+      </div>
     </div>
   </section>
 
@@ -304,7 +314,7 @@
       <h4>Methodology</h4>
       <p>Take-home estimates: federal tax + FICA (7.65%) + state tax.</p>
       <p>Standard deduction applied. Single filer by default.</p>
-      <p>Local taxes not included in calculations.</p>
+      <p>Optional city / local income taxes included when selected.</p>
     </div>
     <div class="footer-col">
       <h4>Disclaimer</h4>
@@ -394,9 +404,78 @@ const FEDERAL = {
 let currentState = null;
 let compareState = null;
 let filingStatus = 'single';
+let selectedLocalTax = 'none';
 
 // ── Populate dropdown ─────────────────────────────────────────
 const stateSelect = document.getElementById("stateSelect");
+const localTaxWrap = document.getElementById("localTaxWrap");
+const localTaxSelect = document.getElementById("localTaxSelect");
+const localTaxNote = document.getElementById("localTaxNote");
+const LOCAL_INCOME_TAX_OPTIONS = {
+  MD: {
+    note: "Maryland counties and Baltimore City levy their own local income taxes.",
+    options: [
+      { value: "none", label: "No local tax", rate: 0 },
+      { value: "montgomery", label: "Montgomery County", rate: 3.2 },
+      { value: "prince-georges", label: "Prince George's County", rate: 3.2 },
+      { value: "baltimore-city", label: "Baltimore City", rate: 3.2 },
+      { value: "howard", label: "Howard County", rate: 3.2 },
+      { value: "anne-arundel", label: "Anne Arundel County", rate: 2.81 },
+      { value: "statewide-low", label: "Lower-tax county example", rate: 2.25 }
+    ]
+  },
+  MI: {
+    note: "Michigan has city income taxes in a limited number of municipalities.",
+    options: [
+      { value: "none", label: "No local tax", rate: 0 },
+      { value: "detroit", label: "Detroit resident", rate: 2.4 },
+      { value: "grand-rapids", label: "Grand Rapids resident", rate: 1.5 },
+      { value: "lansing", label: "Lansing resident", rate: 1.0 },
+      { value: "flint", label: "Flint resident", rate: 1.0 }
+    ]
+  },
+  NY: {
+    note: "New York City and Yonkers add local income tax on top of state tax.",
+    options: [
+      { value: "none", label: "No local tax", rate: 0 },
+      { value: "nyc-lower", label: "New York City — lower bracket example", rate: 3.078 },
+      { value: "nyc-mid", label: "New York City — mid bracket example", rate: 3.762 },
+      { value: "nyc-top", label: "New York City — top bracket example", rate: 3.876 },
+      { value: "yonkers", label: "Yonkers resident surcharge", rate: 1.477 }
+    ]
+  },
+  OH: {
+    note: "Many Ohio municipalities levy their own income tax.",
+    options: [
+      { value: "none", label: "No local tax", rate: 0 },
+      { value: "columbus", label: "Columbus", rate: 2.5 },
+      { value: "cincinnati", label: "Cincinnati", rate: 1.8 },
+      { value: "cleveland", label: "Cleveland", rate: 2.5 },
+      { value: "toledo", label: "Toledo", rate: 2.25 },
+      { value: "low-example", label: "Low-tax city example", rate: 1.0 }
+    ]
+  },
+  PA: {
+    note: "Pennsylvania local earned-income and wage taxes vary widely by municipality.",
+    options: [
+      { value: "none", label: "No local tax", rate: 0 },
+      { value: "philadelphia-resident", label: "Philadelphia resident wage tax", rate: 3.79 },
+      { value: "pittsburgh-school", label: "Pittsburgh school district tax", rate: 2.0 },
+      { value: "typical-eit", label: "Typical local EIT example", rate: 1.0 }
+    ]
+  },
+  IN: {
+    note: "Indiana counties add local income tax on top of the flat state rate.",
+    options: [
+      { value: "none", label: "No local tax", rate: 0 },
+      { value: "marion", label: "Marion County", rate: 2.02 },
+      { value: "hamilton", label: "Hamilton County", rate: 1.1 },
+      { value: "lake", label: "Lake County", rate: 1.5 },
+      { value: "allen", label: "Allen County", rate: 1.48 }
+    ]
+  }
+};
+
 const stateOrder = Object.keys(TAX_DATA).sort((a,b) => TAX_DATA[a].name.localeCompare(TAX_DATA[b].name));
 stateOrder.forEach(code => {
   const opt = document.createElement("option");
@@ -430,7 +509,14 @@ document.querySelectorAll(".filing-toggle button").forEach(btn => {
     btn.classList.add("active");
     filingStatus = btn.dataset.status;
     if (currentState) renderExamples(TAX_DATA[currentState]);
+    if (compareState && currentState) renderCompareTable(currentState, compareState);
   });
+});
+
+localTaxSelect.addEventListener("change", () => {
+  selectedLocalTax = localTaxSelect.value || 'none';
+  if (currentState) renderExamples(TAX_DATA[currentState]);
+  if (compareState && currentState) renderCompareTable(currentState, compareState);
 });
 
 // ── Compare button: always opens modal immediately, pre-filled with current state ──
@@ -475,6 +561,42 @@ document.addEventListener("keydown", e => {
 });
 
 // ── Tax helpers ───────────────────────────────────────────────
+function getLocalTaxConfig(stateCode) {
+  return LOCAL_INCOME_TAX_OPTIONS[stateCode] || null;
+}
+
+function getSelectedLocalTaxOption(stateCode) {
+  const config = getLocalTaxConfig(stateCode);
+  if (!config) return null;
+  return config.options.find(option => option.value === selectedLocalTax) || config.options[0];
+}
+
+function calcLocalTax(gross, stateCode) {
+  const option = getSelectedLocalTaxOption(stateCode);
+  if (!option) return 0;
+  return gross * (option.rate / 100);
+}
+
+function renderLocalTaxControls(stateCode) {
+  const config = getLocalTaxConfig(stateCode);
+  if (!config) {
+    selectedLocalTax = "none";
+    localTaxWrap.classList.add("hidden");
+    localTaxSelect.innerHTML = "";
+    localTaxNote.textContent = "";
+    return;
+  }
+
+  if (!config.options.some(option => option.value === selectedLocalTax)) {
+    selectedLocalTax = config.options[0].value;
+  }
+
+  localTaxSelect.innerHTML = config.options.map(option => `<option value="${option.value}">${option.label}${option.rate ? ` (${fmtPct(option.rate)})` : ""}</option>`).join("");
+  localTaxSelect.value = selectedLocalTax;
+  localTaxNote.textContent = config.note;
+  localTaxWrap.classList.remove("hidden");
+}
+
 function calcStateTax(gross, it, status) {
   if (it.type === "none") return 0;
   const deduction = FEDERAL[status].deduction;
@@ -513,6 +635,7 @@ function renderState(code) {
   document.getElementById("stateEmoji").textContent = d.emoji;
   document.getElementById("stateName").textContent = d.name;
   document.getElementById("stateTagline").textContent = d.tagline;
+  renderLocalTaxControls(code);
   renderQuickStats(d);
   renderIncomeTax(d);
   renderExamples(d);
@@ -550,18 +673,23 @@ function renderIncomeTax(d) {
 
 function renderExamples(d) {
   const incomes = [40000, 75000, 120000, 200000];
+  const localOption = getSelectedLocalTaxOption(currentState);
   const rows = incomes.map(income => {
     const st = calcStateTax(income, d.incomeTax, filingStatus);
     const fed = calcFederalTax(income, filingStatus);
     const fica = calcFICA(income);
-    const th = income - st - fed - fica;
+    const local = calcLocalTax(income, currentState);
+    const th = income - st - fed - fica - local;
     const pct = (th / income) * 100;
     return `<div class="example-row"><div class="example-income">${fmt(income)}</div><div class="example-bar-wrap"><div class="example-bar" style="width:${Math.round(pct)}%"></div></div><div class="example-takehome">${fmt(th)}</div><div class="example-pct">${fmtPct(pct)}</div></div>`;
   }).join("");
+  const localNote = localOption && localOption.rate
+    ? ` Includes local income tax: ${localOption.label}.`
+    : ` No city / local income tax selected.`;
   document.getElementById("examplesContent").innerHTML = `
     <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-faint);margin-bottom:.25rem"><span>Gross Income</span><span>Take-home</span></div>
     ${rows}
-    <p class="example-note">Includes 2025 federal tax, FICA (7.65%), and state income tax using ${filingStatus==='mfj'?'married filing jointly':filingStatus==='hoh'?'head of household':'single'} standard deduction. Local taxes not included.</p>`;
+    <p class="example-note">Includes 2025 federal tax, FICA (7.65%), and state income tax using ${filingStatus==='mfj'?'married filing jointly':filingStatus==='hoh'?'head of household':'single'} standard deduction.${localNote}</p>`;
 }
 
 function renderOtherTax(d) {
@@ -623,8 +751,8 @@ function renderCompareTable(codeA, codeB) {
     return d.incomeTax.brackets[d.incomeTax.brackets.length-1].rate;
   }
 
-  function takehome(d, income) {
-    return income - calcStateTax(income, d.incomeTax, filingStatus) - calcFederalTax(income, filingStatus) - calcFICA(income);
+  function takehome(d, income, code) {
+    return income - calcStateTax(income, d.incomeTax, filingStatus) - calcFederalTax(income, filingStatus) - calcFICA(income) - calcLocalTax(income, code);
   }
 
   function winner(va, vb, lowerIsBetter = true) {
@@ -639,7 +767,7 @@ function renderCompareTable(codeA, codeB) {
   const [wPA, wPB] = winner(a.propertyTax.effective, b.propertyTax.effective);
 
   const incomeRows = incomes.map(inc => {
-    const thA = takehome(a, inc), thB = takehome(b, inc);
+    const thA = takehome(a, inc, codeA), thB = takehome(b, inc, codeB);
     const diff = Math.abs(thA - thB);
     const [wA, wB] = winner(thA, thB, false);
     const diffStr = diff > 0 ? ` <span style="font-size:.7rem;color:var(--ink-faint)">(${fmt(diff)} diff)</span>` : '';
@@ -681,7 +809,7 @@ function renderCompareTable(codeA, codeB) {
       </tbody>
     </table>
     <p style="font-size:.7rem;color:var(--ink-faint);margin-top:1rem;font-style:italic;font-family:var(--mono)">
-      🟢 Green = lower tax burden / higher take-home &nbsp;·&nbsp; 🔴 Red = higher burden &nbsp;·&nbsp; Filing status: ${filingStatus === 'mfj' ? 'Married Filing Jointly' : filingStatus === 'hoh' ? 'Head of Household' : 'Single'}
+      🟢 Green = lower tax burden / higher take-home &nbsp;·&nbsp; 🔴 Red = higher burden &nbsp;·&nbsp; Filing status: ${filingStatus === 'mfj' ? 'Married Filing Jointly' : filingStatus === 'hoh' ? 'Head of Household' : 'Single'} &nbsp;·&nbsp; Local tax selection applies when available
     </p>`;
 }
 
